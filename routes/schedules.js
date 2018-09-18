@@ -8,6 +8,7 @@ const Candidate = require('../models/candidate');
 const User = require('../models/user');
 const Availability = require('../models/availability');
 
+
 router.get('/new', authenticationEnsurer, (req, res, next) => {
   res.render('new', { user: req.user });
 });
@@ -22,7 +23,7 @@ router.post('/', authenticationEnsurer, (req, res, next) => {
     createdBy: req.user.id,
     updatedAt: updatedAt
   }).then((schedule) => {
-    const candidateNames = req.body.candidates.trim().split('\n').map((s) => s.trim());
+    const candidateNames = req.body.candidates.trim().split('\n').map((s) => s.trim()).filter((s) => s !== "");
     const candidates = candidateNames.map((c) => {
       return {
         candidateName: c,
@@ -61,7 +62,7 @@ router.get('/:scheduleId', authenticationEnsurer, (req, res, next) => {
             }
           ],
           where: { scheduleId: schedule.scheduleId },
-          order: [[User, '"username"', 'ASC'], ['"candidateId"', 'ASC']]
+          order: [[User, 'username', 'ASC'], ['"candidateId"', 'ASC']]
         }).then((availabilities) => {
           // 出欠 MapMap(キー:ユーザー ID, 値:出欠Map(キー:候補 ID, 値:出欠)) を作成する
           const availabilityMapMap = new Map(); // key: userId, value: Map(key: candidateId, availability)
@@ -113,4 +114,5 @@ router.get('/:scheduleId', authenticationEnsurer, (req, res, next) => {
     }
   });
 });
+
 module.exports = router;
